@@ -39,6 +39,7 @@ class MainActivity : AppCompatActivity() {
             },
             failureCallback = {
                 Log.d("Network request failed: ", "Failed to get fruit data")
+                getFruit()
             }
         )
     }

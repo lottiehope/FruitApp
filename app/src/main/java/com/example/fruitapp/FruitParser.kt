@@ -11,6 +11,7 @@ class FruitParser {
 
     fun parseFruitDataIntoFruitInfo(data: JSONArray): MutableList<FruitInfo> {
         val fruitList = mutableListOf<FruitInfo>()
+
         for(index in 0..(data.length() - 1)) {
             val nextFruit = data.getJSONObject(index)
             val fruit = FruitInfo(
@@ -19,6 +20,7 @@ class FruitParser {
                 nextFruit.getInt("weight"))
             fruitList.add(fruit)
         }
+
         return fruitList
     }
 

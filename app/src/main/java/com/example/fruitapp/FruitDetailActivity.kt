@@ -28,10 +28,11 @@ class FruitDetailActivity : AppCompatActivity() {
     }
 
     private fun getValueAsPoundsAndPence(value: Int): String {
-        return "£${value/100}"
+        val priceInPounds = value/100.0
+        return "£$priceInPounds"
     }
 
     private fun getValueAsKilograms(value: Int): String {
-        return "${value/1000}kg"
+        return "${value/1000.0}kg"
     }
 }
