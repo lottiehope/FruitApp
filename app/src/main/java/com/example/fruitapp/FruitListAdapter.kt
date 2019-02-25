@@ -18,9 +18,13 @@ class FruitListAdapter(private val fruitList: List<FruitInfo>) : RecyclerView.Ad
     }
 
     override fun onBindViewHolder(holder: FruitListViewHolder, position: Int) {
-        holder.layoutView.fruit_cell_title.text = fruitList[position].type.capitalize()
+        val fruit = fruitList[position]
+        holder.layoutView.fruit_cell_title.text = fruit.type.capitalize()
         holder.layoutView.fruit_cell.setOnClickListener {
             val fruitDetailIntent = Intent(it.context, FruitDetailActivity::class.java)
+            fruitDetailIntent.putExtra(FruitDetailActivity.TYPE, fruit.type)
+            fruitDetailIntent.putExtra(FruitDetailActivity.PRICE, fruit.price)
+            fruitDetailIntent.putExtra(FruitDetailActivity.WEIGHT, fruit.weight)
             startActivity(it.context, fruitDetailIntent, null)
         }
     }

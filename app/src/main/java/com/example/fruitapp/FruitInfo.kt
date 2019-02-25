@@ -1,3 +1,3 @@
 package com.example.fruitapp
 
-data class FruitInfo(val type: String, val price: Float, val weight: Float)
+data class FruitInfo(val type: String, val price: Int, val weight: Int)
