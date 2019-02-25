@@ -15,8 +15,8 @@ class FruitParser {
             val nextFruit = data.getJSONObject(index)
             val fruit = FruitInfo(
                 nextFruit.getString("type"),
-                nextFruit.getString("price").toInt(),
-                nextFruit.getString("weight").toInt())
+                nextFruit.getString("price").toFloat(),
+                nextFruit.getString("weight").toFloat())
             fruitList.add(fruit)
         }
         return fruitList

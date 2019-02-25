@@ -18,7 +18,7 @@ class FruitListAdapter(private val fruitList: List<FruitInfo>) : RecyclerView.Ad
     }
 
     override fun onBindViewHolder(holder: FruitListViewHolder, position: Int) {
-        holder.layoutView.fruit_cell_title.text = fruitList[position].type
+        holder.layoutView.fruit_cell_title.text = fruitList[position].type.capitalize()
         holder.layoutView.fruit_cell.setOnClickListener {
             val fruitDetailIntent = Intent(it.context, FruitDetailActivity::class.java)
             startActivity(it.context, fruitDetailIntent, null)
