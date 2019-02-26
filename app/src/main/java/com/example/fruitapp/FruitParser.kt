@@ -5,7 +5,9 @@ import org.json.JSONArray
 import org.json.JSONObject
 import java.io.IOException
 
-class FruitParser(private val client: OkHttpClient) {
+class FruitParser {
+
+    private val client = OkHttpClient()
 
     fun parseFruitDataIntoFruitInfo(data: JSONArray): MutableList<FruitInfo> {
         val fruitList = mutableListOf<FruitInfo>()

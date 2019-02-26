@@ -2,9 +2,8 @@ package com.example.fruitapp
 
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
+import android.view.View
 import kotlinx.android.synthetic.main.activity_fruit_detail.*
-import java.math.RoundingMode
-import java.text.DecimalFormat
 
 class FruitDetailActivity : AppCompatActivity() {
 
@@ -14,7 +13,19 @@ class FruitDetailActivity : AppCompatActivity() {
         const val WEIGHT = "weight"
     }
 
+    private val statsTimeService = StatsTimeService()
+    private val statsSender = StatsSender()
+
+    private val layoutChangeListener: View.OnLayoutChangeListener =
+        View.OnLayoutChangeListener { _, _, _, _, _, _, _, _, _ ->
+            statsTimeService.stopTimer()
+            statsSender.createAndSendStat(
+                StatsSender.StatsSenderRequestTypes.DISPLAY,
+                statsTimeService.getDurationFromTimer().toString())
+        }
+
     override fun onCreate(savedInstanceState: Bundle?) {
+        statsTimeService.startTimer()
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_fruit_detail)
 
@@ -25,6 +36,13 @@ class FruitDetailActivity : AppCompatActivity() {
         fruit_type.text = type
         fruit_price.text = getValueAsPoundsAndPence(price)
         fruit_weight.text = getValueAsKilograms(weight)
+
+        fruit_detail_layout.addOnLayoutChangeListener(layoutChangeListener)
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        fruit_detail_layout.removeOnLayoutChangeListener(layoutChangeListener)
     }
 
     private fun getValueAsPoundsAndPence(value: Int): String {

@@ -2,39 +2,60 @@ package com.example.fruitapp
 
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
-import android.support.v4.widget.SwipeRefreshLayout
 import android.support.v7.widget.LinearLayoutManager
-import android.support.v7.widget.RecyclerView
 import android.util.Log
+import android.view.View
 import okhttp3.OkHttpClient
+import org.json.JSONArray
+import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : AppCompatActivity() {
 
-    private lateinit var recyclerView: RecyclerView
-    private lateinit var viewAdapter: RecyclerView.Adapter<*>
-    private lateinit var viewManager: RecyclerView.LayoutManager
-
-    private val client = OkHttpClient()
-    private val parser = FruitParser(client)
-    private val statsSender = StatsSender(client)
+    private val parser = FruitParser()
+    private val statsSender = StatsSender()
     private val timeService = TimeService()
+    private val statsTimeService = StatsTimeService()
+
+    private val layoutChangeListener: View.OnLayoutChangeListener =
+        View.OnLayoutChangeListener { _, _, _, _, _, _, _, _, _ ->
+            statsTimeService.stopTimer()
+            statsSender.createAndSendStat(
+                StatsSender.StatsSenderRequestTypes.DISPLAY,
+                statsTimeService.getDurationFromTimer().toString())
+        }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-
-        viewManager = LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
-        recyclerView = findViewById(R.id.main_fruit_list)
         getFruit()
 
-        val refreshLayout = findViewById<SwipeRefreshLayout>(R.id.refresh_main)
-        refreshLayout.setOnRefreshListener {
-            refreshLayout.isRefreshing = true
-            recyclerView.removeAllViewsInLayout()
+        refresh_main.setOnRefreshListener {
+            refresh_main.isRefreshing = true
+            main_fruit_list.removeAllViewsInLayout()
             getFruit()
-            refreshLayout.isRefreshing = false
+            refresh_main.isRefreshing = false
         }
 
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        main_fruit_list.removeOnLayoutChangeListener(layoutChangeListener)
+    }
+
+
+    private fun addDataToRecyclerView(data: JSONArray) {
+        runOnUiThread{
+            statsTimeService.startTimer()
+            val viewAdapter = FruitListAdapter(parser.parseFruitDataIntoFruitInfo(data))
+            val viewManager = LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
+
+            main_fruit_list.apply {
+                this.addOnLayoutChangeListener(layoutChangeListener)
+                layoutManager = viewManager
+                adapter = viewAdapter
+            }
+        }
     }
 
     private fun getFruit() {
@@ -42,13 +63,7 @@ class MainActivity : AppCompatActivity() {
             timeService,
             successCallback = { data, timePassed ->
                 statsSender.createAndSendStat(StatsSender.StatsSenderRequestTypes.LOAD, timePassed.toString())
-                runOnUiThread{
-                    viewAdapter = FruitListAdapter(parser.parseFruitDataIntoFruitInfo(data))
-                    recyclerView.apply {
-                        layoutManager = viewManager
-                        adapter = viewAdapter
-                    }
-                }
+                addDataToRecyclerView(data)
             },
             failureCallback = {
                 Log.d("Network request failed: ", "Failed to get fruit data")
