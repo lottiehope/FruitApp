@@ -6,18 +6,18 @@ import android.support.v4.widget.SwipeRefreshLayout
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.util.Log
+import okhttp3.OkHttpClient
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var recyclerView: RecyclerView
-
     private lateinit var viewAdapter: RecyclerView.Adapter<*>
-
     private lateinit var viewManager: RecyclerView.LayoutManager
 
-    private val parser = FruitParser()
-
-    private val statsSender = StatsSender()
+    private val client = OkHttpClient()
+    private val parser = FruitParser(client)
+    private val statsSender = StatsSender(client)
+    private val timeService = TimeService()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -39,7 +39,9 @@ class MainActivity : AppCompatActivity() {
 
     private fun getFruit() {
         parser.requestFruitData(
-            successCallback = { data ->
+            timeService,
+            successCallback = { data, timePassed ->
+                statsSender.createAndSendStat(StatsSender.StatsSenderRequestTypes.LOAD, timePassed.toString())
                 runOnUiThread{
                     viewAdapter = FruitListAdapter(parser.parseFruitDataIntoFruitInfo(data))
                     recyclerView.apply {

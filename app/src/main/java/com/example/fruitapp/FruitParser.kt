@@ -5,9 +5,7 @@ import org.json.JSONArray
 import org.json.JSONObject
 import java.io.IOException
 
-class FruitParser {
-
-    private val client = OkHttpClient()
+class FruitParser(private val client: OkHttpClient) {
 
     fun parseFruitDataIntoFruitInfo(data: JSONArray): MutableList<FruitInfo> {
         val fruitList = mutableListOf<FruitInfo>()
@@ -24,21 +22,23 @@ class FruitParser {
         return fruitList
     }
 
-    fun requestFruitData(successCallback: (JSONArray) -> Unit, failureCallback: (IOException) -> Unit) {
+    fun requestFruitData(timeService: TimeService, successCallback: (JSONArray, Int) -> Unit, failureCallback: (IOException) -> Unit) {
         val request = Request.Builder()
             .url("https://raw.githubusercontent.com/fmtvp/recruit-test-data/master/data.json")
             .addHeader("accept", "application/json")
             .build()
-
+        val startTime = timeService.getTimeNow()
         client.newCall(request).enqueue(object : Callback {
             override fun onFailure(call: Call, e: IOException) {
                 failureCallback(e)
             }
 
             override fun onResponse(call: Call, response: Response) {
-                val objectJSON = JSONObject(response.body()?.string())
-                val responseBody = objectJSON.getJSONArray("fruit")
-                successCallback(responseBody)
+                val endTime = timeService.getTimeNow()
+                val timePassed = timeService.getTimePassedInMillis(startTime, endTime)
+                val responseAsObject = JSONObject(response.body()?.string())
+                val responseBody = responseAsObject.getJSONArray("fruit")
+                successCallback(responseBody, timePassed)
             }
 
         })

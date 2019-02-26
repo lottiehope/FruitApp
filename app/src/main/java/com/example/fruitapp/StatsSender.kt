@@ -3,9 +3,7 @@ package com.example.fruitapp
 import okhttp3.*
 import java.io.IOException
 
-class StatsSender {
-
-    private val client = OkHttpClient()
+class StatsSender(private val client: OkHttpClient) {
 
     enum class StatsSenderRequestTypes(val requestTypeString: String) {
         ERROR("error"),
