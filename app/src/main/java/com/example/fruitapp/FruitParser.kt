@@ -24,7 +24,7 @@ class FruitParser {
         return fruitList
     }
 
-    fun requestFruitData(successCallback: (JSONArray) -> Unit, failureCallback: () -> Unit) {
+    fun requestFruitData(successCallback: (JSONArray) -> Unit, failureCallback: (IOException) -> Unit) {
         val request = Request.Builder()
             .url("https://raw.githubusercontent.com/fmtvp/recruit-test-data/master/data.json")
             .addHeader("accept", "application/json")
@@ -32,7 +32,7 @@ class FruitParser {
 
         client.newCall(request).enqueue(object : Callback {
             override fun onFailure(call: Call, e: IOException) {
-                failureCallback()
+                failureCallback(e)
             }
 
             override fun onResponse(call: Call, response: Response) {
