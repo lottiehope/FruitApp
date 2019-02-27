@@ -14,7 +14,7 @@ class FruitDetailActivity : AppCompatActivity() {
     }
 
     private val statsTimeService = StatsTimeService()
-    private val statsSender = StatsSender()
+    private lateinit var statsSender: StatsSender
 
     private val layoutChangeListener: View.OnLayoutChangeListener =
         View.OnLayoutChangeListener { _, _, _, _, _, _, _, _, _ ->
@@ -25,6 +25,7 @@ class FruitDetailActivity : AppCompatActivity() {
         }
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        statsSender = StatsSender((this.applicationContext as FruitApplication).okHttpClient)
         statsTimeService.startTimer()
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_fruit_detail)

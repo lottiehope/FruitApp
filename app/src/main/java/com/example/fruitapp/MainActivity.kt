@@ -5,14 +5,19 @@ import android.os.Bundle
 import android.support.v7.widget.LinearLayoutManager
 import android.util.Log
 import android.view.View
-import okhttp3.OkHttpClient
+import com.google.gson.Gson
 import org.json.JSONArray
 import kotlinx.android.synthetic.main.activity_main.*
+import okhttp3.OkHttpClient
 
 class MainActivity : AppCompatActivity() {
 
-    private val parser = FruitParser()
-    private val statsSender = StatsSender()
+    private lateinit var okHttpClient: OkHttpClient
+    private lateinit var gson: Gson
+
+    private lateinit var fruitParser: FruitParser
+    private lateinit var statsSender: StatsSender
+
     private val timeService = TimeService()
     private val statsTimeService = StatsTimeService()
 
@@ -27,6 +32,12 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        okHttpClient = (this.applicationContext as FruitApplication).okHttpClient
+        gson = (this.applicationContext as FruitApplication).gson
+        statsSender = StatsSender(okHttpClient)
+        fruitParser = FruitParser(okHttpClient, gson)
+
         getFruit()
 
         refresh_main.setOnRefreshListener {
@@ -44,10 +55,10 @@ class MainActivity : AppCompatActivity() {
     }
 
 
-    private fun addDataToRecyclerView(data: JSONArray) {
+    private fun addDataToRecyclerView(data: FruitCollection) {
         runOnUiThread{
             statsTimeService.startTimer()
-            val viewAdapter = FruitListAdapter(parser.parseFruitDataIntoFruitInfo(data))
+            val viewAdapter = FruitListAdapter(data.fruit)
             val viewManager = LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
 
             main_fruit_list.apply {
@@ -59,7 +70,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun getFruit() {
-        parser.requestFruitData(
+        fruitParser.requestFruitData(
             timeService,
             successCallback = { data, timePassed ->
                 statsSender.createAndSendStat(StatsSender.StatsSenderRequestTypes.LOAD, timePassed.toString())

@@ -1,12 +1,9 @@
 package com.example.fruitapp
 
-import android.util.Log
 import okhttp3.*
 import java.io.IOException
 
-class StatsSender {
-
-    private val client = OkHttpClient()
+class StatsSender(private val client: OkHttpClient) {
 
     enum class StatsSenderRequestTypes(val requestTypeString: String) {
         ERROR("error"),
@@ -22,14 +19,14 @@ class StatsSender {
     }
 
     private fun sendStat(request: Request) {
-        Log.d("Sending this request now", request.toString())
-        client.newCall(request).enqueue(object : Callback {
+        val call = client.newCall(request)
+        call.enqueue(object : Callback {
             override fun onFailure(call: Call, e: IOException) {
-                Log.d("Stat Request", "Failed to send")
+                //TODO: what should happen on failure? Repeat a few times or just give up
             }
 
             override fun onResponse(call: Call, response: Response) {
-                Log.d("Stat Request", "Successfully sent")
+                //Do nothing
             }
         })
     }

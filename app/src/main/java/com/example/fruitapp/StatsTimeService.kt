@@ -2,9 +2,7 @@ package com.example.fruitapp
 
 import java.lang.Exception
 
-class StatsTimeService {
-
-    private val timeService = TimeService()
+class StatsTimeService(private val timeService: TimeService = TimeService()) {
 
     private var timeAtStart = -1L
     private var timeAtEnd = -1L
